@@ -1,5 +1,6 @@
 const express = require('express');
 const _ = require('lodash');
+let util = require('./util');
 let models = require('../models');
 
 const router = express.Router();
@@ -90,9 +91,9 @@ router.post('/', (req, res) => {
 
         return createCategories(cateAndWorkerList.categoryList);
     }).then(() => {
+        util.sendMail(workerList);
         res.json({id: projectId});
     }).catch(err => {
-        console.log(err);
         res.status(500).json(err);
     });
 });
@@ -137,7 +138,6 @@ function createProject(manager, startDate, dueDate, projectType) {
         }).then(result => {
             resolve(result);
         }).catch(err => {
-            console.log(err);
             reject(err);
         });
     });
@@ -148,7 +148,6 @@ function createCategories(categoryList) {
         models.Category.bulkCreate(categoryList).then(() => {
             resolve();
         }).catch(err => {
-            console.log(err);
             reject(err);
         });
     });
