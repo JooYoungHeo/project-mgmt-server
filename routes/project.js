@@ -1,5 +1,6 @@
 const express = require('express');
 const _ = require('lodash');
+let util = require('./util');
 let models = require('../models');
 
 const router = express.Router();
@@ -90,9 +91,9 @@ router.post('/', (req, res) => {
 
         return createCategories(cateAndWorkerList.categoryList);
     }).then(() => {
+        util.sendMail(workerList);
         res.json({id: projectId});
     }).catch(err => {
-        console.log(err);
         res.status(500).json(err);
     });
 });
@@ -137,7 +138,6 @@ function createProject(manager, startDate, dueDate, projectType) {
         }).then(result => {
             resolve(result);
         }).catch(err => {
-            console.log(err);
             reject(err);
         });
     });
@@ -148,7 +148,40 @@ function createCategories(categoryList) {
         models.Category.bulkCreate(categoryList).then(() => {
             resolve();
         }).catch(err => {
-            console.log(err);
+            reject(err);
+        });
+    });
+}
+
+router.post('/:projectId', (req, res) => {
+    let projectId = Number(req.params.projectId);
+    let manager = req.body.manager;
+    let startDate = req.body.start_date;
+    let dueDate = req.body.due_date;
+    let active = req.body.active;
+    let updateObject = {};
+
+    if (!_.isUndefined(manager)) updateObject['manager'] = manager;
+    if (!_.isUndefined(startDate)) updateObject['start_date'] = startDate;
+    if (!_.isUndefined(dueDate)) updateObject['due_date'] = dueDate;
+    if (!_.isUndefined(active)) updateObject['active'] = active;
+
+    updateProject(projectId, updateObject).then(() => {
+        res.json({id: projectId});
+    }).catch(err => {
+        res.status(500).json(err);
+    });
+});
+
+function updateProject(id, updateObject) {
+    return new Promise((resolve, reject) => {
+        models.Project.update(updateObject, {
+            where: {
+                id: id
+            }
+        }).then(() => {
+            resolve();
+        }).catch(err => {
             reject(err);
         });
     });
