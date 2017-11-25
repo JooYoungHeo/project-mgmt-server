@@ -158,11 +158,13 @@ router.post('/:projectId', (req, res) => {
     let manager = req.body.manager;
     let startDate = req.body.start_date;
     let dueDate = req.body.due_date;
+    let active = req.body.active;
     let updateObject = {};
 
     if (!_.isUndefined(manager)) updateObject['manager'] = manager;
     if (!_.isUndefined(startDate)) updateObject['start_date'] = startDate;
     if (!_.isUndefined(dueDate)) updateObject['due_date'] = dueDate;
+    if (!_.isUndefined(active)) updateObject['active'] = active;
 
     updateProject(projectId, updateObject).then(() => {
         res.json({id: projectId});

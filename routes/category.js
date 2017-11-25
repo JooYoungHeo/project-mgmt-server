@@ -44,7 +44,6 @@ router.get('/:categoryId', (req, res) => {
     }).catch(err => {
         res.status(500).json(err);
     });
-
 });
 
 function findCategoryById(categoryId) {
@@ -56,6 +55,44 @@ function findCategoryById(categoryId) {
             }
         }).then(result => {
             resolve(result);
+        }).catch(err => {
+            reject(err);
+        });
+    });
+}
+
+router.post('/:categoryId', (req, res) => {
+    let categoryId = Number(req.params.categoryId);
+    let categoryName = req.body.name;
+    let worker = req.body.worker;
+    let wbs = req.body.wbs;
+    let startDate = req.body.start_date;
+    let dueDate = req.body.due_date;
+    let active = req.body.active;
+    let updateObject = {};
+
+    if (!_.isUndefined(categoryName)) updateObject['category_name'] = categoryName;
+    if (!_.isUndefined(worker)) updateObject['worker'] = worker;
+    if (!_.isUndefined(wbs)) updateObject['wbs'] = wbs;
+    if (!_.isUndefined(startDate)) updateObject['start_date'] = startDate;
+    if (!_.isUndefined(dueDate)) updateObject['due_date'] = dueDate;
+    if (!_.isUndefined(active)) updateObject['active'] = active;
+
+    updateCategory(categoryId, updateObject).then(() => {
+        res.json({id: categoryId});
+    }).catch(err => {
+        res.status(500).json(err);
+    });
+});
+
+function updateCategory(id, updateObject) {
+    return new Promise((resolve, reject) => {
+        models.Category.update(updateObject, {
+            where: {
+                id: id
+            }
+        }).then(() => {
+            resolve();
         }).catch(err => {
             reject(err);
         });
