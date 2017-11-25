@@ -30,7 +30,8 @@ function findProjects(manager, projectType) {
             attributes: ['id', 'manager', 'start_date', 'due_date', 'project_type', 'active'],
             where: whereCondition,
             include: [{
-                model: models.Category
+                model: models.Category,
+                attributes: ['id', 'category_name', 'worker', 'wbs', 'start_date', 'due_date', 'active', 'parent', 'project_id']
             }]
         }).then(result => {
             resolve(result);
@@ -62,7 +63,8 @@ function findProjectById(projectId) {
                 id: projectId
             },
             include: [{
-                model: models.Category
+                model: models.Category,
+                attributes: ['id', 'category_name', 'worker', 'wbs', 'start_date', 'due_date', 'active', 'parent', 'project_id']
             }]
         }).then(result => {
             resolve(result);
