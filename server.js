@@ -6,8 +6,10 @@ const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
-app.use('/', api);
+app.use(bodyParser.urlencoded({extended: true}));
+
+app.use('/api', api);
 
 app.listen(port, () => {
-  console.log(`server start # ${port}`);
+    console.log(`server start # ${port}`);
 });
