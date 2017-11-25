@@ -74,4 +74,84 @@ function findProjectById(projectId) {
     });
 }
 
+router.post('/', (req, res) => {
+    let manager = req.body.manager;
+    let startDate = req.body.start_date;
+    let dueDate = req.body.due_date;
+    let projectType = req.body.project_type;
+    let large = req.body.large;
+    let workerList;
+    let projectId;
+
+    createProject(manager, startDate, dueDate, projectType).then(result => {
+        projectId = result.id;
+        let cateAndWorkerList = convertCategoryList(result.id, large);
+        workerList = cateAndWorkerList.workerList;
+
+        return createCategories(cateAndWorkerList.categoryList);
+    }).then(() => {
+        res.json({id: projectId});
+    }).catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+    });
+});
+
+function convertCategoryList(id, large) {
+    let categoryList = [];
+    let workerList = [];
+
+    for (let i = 0 ; i < large.length ; i++) {
+        let largeElement = large[i];
+        let parent = largeElement.name;
+
+        for (let j = 0 ; j < largeElement.small.length ; j++) {
+            let smallElement = largeElement.small[j];
+
+            categoryList.push({
+                category_name: smallElement.name,
+                worker: smallElement.worker,
+                wbs: smallElement.wbs,
+                start_date: smallElement.start_date,
+                due_date: smallElement.due_date,
+                parent: parent,
+                active: true,
+                project_id: id
+            });
+
+            workerList.push(smallElement.worker);
+        }
+    }
+
+    return {categoryList: categoryList, workerList: workerList};
+}
+
+function createProject(manager, startDate, dueDate, projectType) {
+    return new Promise((resolve, reject) => {
+        models.Project.create({
+            manager: manager,
+            start_date: startDate,
+            due_date: dueDate,
+            project_type: projectType,
+            active: true
+        }).then(result => {
+            resolve(result);
+        }).catch(err => {
+            console.log(err);
+            reject(err);
+        });
+    });
+}
+
+function createCategories(categoryList) {
+    return new Promise((resolve, reject) => {
+        models.Category.bulkCreate(categoryList).then(() => {
+            resolve();
+        }).catch(err => {
+            console.log(err);
+            reject(err);
+        });
+    });
+}
+
 module.exports = router;
